@@ -46,6 +46,7 @@ let
       {"INICIO_MÊS", type date},
       {"FIM_MÊS", type date}
     }
-  )
+  ),
+Renomear = Table.RenameColumns(#"Tipo Alterado1",{{"Column1", "DATA"}})
 in
   #"Tipo Alterado1"
