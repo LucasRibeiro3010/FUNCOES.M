@@ -1,0 +1,62 @@
+let
+  Fonte = Excel.CurrentWorkbook(){[Name = "Tabela8"]}[Content], 
+  #"Tipo Alterado" = Table.TransformColumnTypes(
+    Fonte, 
+    {{"CODIGO DA LOJA", type text}, {"VOLUMES", Int64.Type}, {"VALOR", type number}}
+  ), 
+  _Frete = #"Tipo Alterado"[VALOR]{0}, 
+  Personalizar1 = #"Tipo Alterado", 
+  #"Consultas Mescladas" = Table.NestedJoin(
+    Personalizar1, 
+    {"CODIGO DA LOJA"}, 
+    LojasPLan, 
+    {"CODIGO"}, 
+    "LojasPLan", 
+    JoinKind.LeftOuter
+  ), 
+  #"LojasPLan Expandido" = Table.ExpandTableColumn(
+    #"Consultas Mescladas", 
+    "LojasPLan", 
+    {"LOJAS"}, 
+    {"LOJAS"}
+  ), 
+  #"Consultas Mescladas1" = Table.NestedJoin(
+    #"LojasPLan Expandido", 
+    {"CODIGO DA LOJA"}, 
+    Basekm, 
+    {"COD"}, 
+    "Basekm", 
+    JoinKind.LeftOuter
+  ), 
+  #"Basekm Expandido" = Table.ExpandTableColumn(
+    #"Consultas Mescladas1", 
+    "Basekm", 
+    {"KM_PHS_LOJA"}, 
+    {"KM_PHS_LOJA"}
+  ), 
+  #"Colunas Reordenadas" = Table.ReorderColumns(
+    #"Basekm Expandido", 
+    {"CODIGO DA LOJA", "LOJAS", "KM_PHS_LOJA", "VOLUMES", "VALOR"}
+  ), 
+  #"Tipo Alterado1" = Table.TransformColumnTypes(
+    #"Colunas Reordenadas", 
+    {{"KM_PHS_LOJA", Int64.Type}}
+  ), 
+  _Km = List.Sum(#"Tipo Alterado1"[KM_PHS_LOJA]), 
+  Personalizar2 = #"Tipo Alterado1", 
+  _volumes = List.Sum(Personalizar2[VOLUMES]), 
+  #"Personalização Adicionada" = Table.AddColumn(
+    Personalizar2, 
+    "%_RATEIO", 
+    each List.Average({[VOLUMES] / _volumes, [KM_PHS_LOJA] / _Km}), 
+    Percentage.Type
+  ), 
+  #"Personalização Adicionada1" = Table.AddColumn(
+    #"Personalização Adicionada", 
+    "VALOR_FRETE", 
+    each [#"%_RATEIO"] * [VALOR], 
+    type number
+  ), 
+  #"Colunas Removidas" = Table.RemoveColumns(#"Personalização Adicionada1", {"VALOR"})
+in
+  #"Colunas Removidas"
