@@ -1,8 +1,8 @@
 // Função Calendario
-(
+    (
     DataIni as date,
     DataFim as date
-)=>
+    )=>
         List.Dates(
         DataIni,
         Duration.Days(DataFim-DataIni)+1,
