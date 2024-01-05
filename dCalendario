@@ -1,5 +1,5 @@
 let
-  Fonte = ListaDatas(List.Min(fVendasG[DT_ENVIO]), List.Max(fVendasG[DT_ENVIO])),
+  Fonte = ListaDatas(_inicio,_fim),
   #"Convertido para Tabela" = Table.FromList(
     Fonte,
     Splitter.SplitByNothing(),
