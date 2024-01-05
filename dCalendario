@@ -1,4 +1,4 @@
-let
+let 
   Fonte = ListaDatas(_inicio,_fim),
   #"Convertido para Tabela" = Table.FromList(
     Fonte,
