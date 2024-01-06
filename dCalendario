@@ -17,6 +17,7 @@ let
           ANO        = Date.Year([Column1]),
           BIMESTRE   = Number.RoundUp(Date.Month([Column1]) / 2, 0),
           NOME_MES   = Date.MonthName([Column1]),
+          NUM_MÊS    = Date.Month([Column1]),
           SEMANA_ANO = Date.WeekOfYear([Column1]),
           NOME_DIA   = Date.DayOfWeekName([Column1]),
           FIM_MÊS    = Date.EndOfMonth([Column1]),
