@@ -14,6 +14,7 @@ let
     each Table.FromRecords(
       {
         [
+          DIA        = Date.Day([Column1]),
           ANO        = Date.Year([Column1]),
           BIMESTRE   = Number.RoundUp(Date.Month([Column1]) / 2, 0),
           NOME_MES   = Date.MonthName([Column1]),
