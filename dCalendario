@@ -46,7 +46,8 @@ let
       {"NOME_MES", type text},
       {"NOME_DIA", type text},
       {"INICIO_MÊS", type date},
-      {"FIM_MÊS", type date}
+      {"FIM_MÊS", type date},
+      {"DIA", Int64.Type}
     }
   ),
 Renomear = Table.RenameColumns(#"Tipo Alterado1",{{"Column1", "DATA"}})
