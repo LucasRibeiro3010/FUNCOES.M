@@ -1,7 +1,8 @@
 let
-  Fonte = Excel.CurrentWorkbook(){[Name = "Base"]}[Content], 
+  Fonte = Excel.CurrentWorkbook(){[Name = "Base"]}[Content],
+    #"Comprimento do texto calculado" = Table.TransformColumns(Table.TransformColumnTypes(Fonte, {{"CODIGO DA LOJA", type text}}, "pt-BR"),{{"CODIGO DA LOJA",each Text.PadStart(_,3,"0") , type text}}), 
   #"Tipo Alterado" = Table.TransformColumnTypes(
-    Fonte, 
+    #"Comprimento do texto calculado", 
     {{"CODIGO DA LOJA", type text}, {"VOLUMES", Int64.Type}, {"VALOR", type number}}
   ), 
   _Frete = #"Tipo Alterado"[VALOR]{0}, 
