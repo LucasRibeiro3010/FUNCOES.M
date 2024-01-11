@@ -1,0 +1,48 @@
+let
+Fonte = Excel.CurrentWorkbook(){[Name = "Base"]}[Content],
+FonteAjustada = Table.TransformColumns(
+Table.TransformColumnTypes(Fonte, {{"CODIGO DA LOJA", type text}}, "pt-BR"),
+{{"CODIGO DA LOJA", each Text.PadStart(_, 3, "0"), type text}}
+),
+FonteTipada = Table.TransformColumnTypes(
+FonteAjustada,
+{{"CODIGO DA LOJA", type text}, {"VOLUMES", Int64.Type}, {"VALOR", type number}}
+),
+//_Frete = FonteTipada[VALOR]{0},
+Mesclagem1 = Table.NestedJoin(
+FonteTipada,
+{"CODIGO DA LOJA"},
+LojasPLan,
+{"CODIGO"}
+,"LojasPlan"
+,JoinKind.LeftOuter
+),
+ExpansaoLojasPLan = Table.ExpandTableColumn(Mesclagem1, "LojasPlan", {"LOJAS"}, {"LOJAS"}),
+// #"Colunas Removidas" = Table.RemoveColumns(ExpansaoLojasPLan,{"VALOR"}),
+Mesclagem2 = Table.NestedJoin(
+ExpansaoLojasPLan,
+{"CODIGO DA LOJA"},
+Basekm,
+{"COD"},
+"Basekm",
+JoinKind.LeftOuter
+),
+ExpansaoBasekm = Table.ExpandTableColumn(Mesclagem2, "Basekm", {"KM_PHS_LOJA"}, {"KM_PHS_LOJA"}),
+    #"Colunas Reordenadas" = Table.ReorderColumns(ExpansaoBasekm,{"CODIGO DA LOJA", "LOJAS", "VOLUMES", "KM_PHS_LOJA"}),
+TipagemKM = Table.TransformColumnTypes(#"Colunas Reordenadas", {{"KM_PHS_LOJA", Int64.Type}}),
+ //********   _Km = List.Sum(TipagemKM[KM_PHS_LOJA]),
+//*************_volumes = List.Sum(TipagemKM[VOLUMES]),
+    RateioFrete = Table.AddColumn(TipagemKM, 
+"RATEIO_FRETE", each
+let
+Vol = List.Sum(TipagemKM[VOLUMES]),
+km = List.Sum(TipagemKM[KM_PHS_LOJA]),
+Frete = List.Max(TipagemKM[VALOR])
+in
+
+List.Average({[VOLUMES] / Vol, [KM_PHS_LOJA] / km})*Frete
+,type number
+),
+    ValorRemovido = Table.RemoveColumns(RateioFrete,{"VALOR"})
+in
+    ValorRemovido
