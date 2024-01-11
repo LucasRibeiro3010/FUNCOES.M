@@ -22,14 +22,13 @@ ExpansaoLojasPLan = Table.ExpandTableColumn(Mesclagem1, "LojasPlan", {"LOJAS"}, 
 Mesclagem2 = Table.NestedJoin(
 ExpansaoLojasPLan,
 {"CODIGO DA LOJA"},
-Basekm,
+LojasWms,
 {"COD"},
 "Basekm",
 JoinKind.LeftOuter
 ),
 ExpansaoBasekm = Table.ExpandTableColumn(Mesclagem2, "Basekm", {"KM_PHS_LOJA"}, {"KM_PHS_LOJA"}),
-    #"Colunas Reordenadas" = Table.ReorderColumns(ExpansaoBasekm,{"CODIGO DA LOJA", "LOJAS", "VOLUMES", "KM_PHS_LOJA"}),
-TipagemKM = Table.TransformColumnTypes(#"Colunas Reordenadas", {{"KM_PHS_LOJA", Int64.Type}}),
+    TipagemKM = Table.TransformColumnTypes(ExpansaoBasekm, {{"KM_PHS_LOJA", Int64.Type}}),
  //********   _Km = List.Sum(TipagemKM[KM_PHS_LOJA]),
 //*************_volumes = List.Sum(TipagemKM[VOLUMES]),
     RateioFrete = Table.AddColumn(TipagemKM, 
@@ -43,6 +42,8 @@ in
 List.Average({[VOLUMES] / Vol, [KM_PHS_LOJA] / km})*Frete
 ,type number
 ),
-    ValorRemovido = Table.RemoveColumns(RateioFrete,{"VALOR"})
+    PercentualRateio = Table.AddColumn(RateioFrete, "%_RATEIO", each [RATEIO_FRETE]/[VALOR],Percentage.Type),
+    #"Colunas Reordenadas" = Table.ReorderColumns(PercentualRateio,{"CODIGO DA LOJA", "LOJAS", "VOLUMES", "KM_PHS_LOJA","%_RATEIO","RATEIO_FRETE"}),
+    ValorRemovido = Table.RemoveColumns(#"Colunas Reordenadas",{"VALOR"})
 in
     ValorRemovido
