@@ -1,0 +1,11 @@
+Sub Atualizar()
+'
+' Atualizar Macro
+'
+
+'
+    Range("G1").Select
+    ActiveCell.FormulaR1C1 = Now()
+    Range("A2").Select
+    ActiveWorkbook.RefreshAll
+End Sub
