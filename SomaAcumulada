@@ -1,0 +1,12 @@
+= (Tabelaa as table) =>
+
+let
+    Fonte = Tabelaa,
+    LinhaAdicionado = Table.AddIndexColumn(Fonte, "Linha", 1, 1, Int64.Type),
+    Final = Table.AddColumn(LinhaAdicionado, "Acumulada", each 
+        List.Sum(
+            List.FirstN(Fonte[MovimentoValor],[Linha])
+        )
+    ,type number)
+in
+    Final
