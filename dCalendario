@@ -17,6 +17,7 @@ let
           ID         = Date.ToText([Column1],"ddMMyyyy"),
           DIA        = Date.Day([Column1]),
           ANO        = Date.Year([Column1]),
+          ANO_MÊS    = Date.ToText([Column1],"yyyy-MM",
           BIMESTRE   = Number.RoundUp(Date.Month([Column1]) / 2, 0),
           NOME_MES   = Date.MonthName([Column1]),
           NUM_MÊS    = Date.Month([Column1]),
