@@ -1,5 +1,17 @@
 let 
-  Fonte = ListaDatas(_inicio,_fim),
+  ListaDatas =
+        (
+          DataIni as date,
+          DataFim as date
+        )=> 
+        List.Dates(
+        DataIni,
+        Duration.Days(DataFim-DataIni)+1,
+        #duration(1,0,0,0)
+        ),
+  _ini =#date (2024,01,01),
+  _fim =#date (2024,12,31),
+  Fonte = ListaDatas(_ini, _fim),
   #"Convertido para Tabela" = Table.FromList(
     Fonte,
     Splitter.SplitByNothing(),
@@ -17,7 +29,7 @@ let
           DATA_ID         = Date.ToText([Column1],"ddMMyyyy"),
           DIA        = Date.Day([Column1]),
           ANO        = Date.Year([Column1]),
-          ANO_MÊS    = Date.ToText([Column1],"yyyy-MM",
+          ANO_MÊS    = Date.ToText([Column1],"yyyy-MM"),
           BIMESTRE   = Number.RoundUp(Date.Month([Column1]) / 2, 0),
           NOME_MES   = Date.MonthName([Column1]),
           NUM_MÊS    = Date.Month([Column1]),
@@ -50,7 +62,7 @@ let
       {"INICIO_MÊS", type date},
       {"FIM_MÊS", type date},
       {"DIA", Int64.Type},
-      {"ID", type text}
+      {"DATA_ID", type text}
     }
   ),
 Renomear = Table.RenameColumns(#"Tipo Alterado1",{{"Column1", "DATA"}})
