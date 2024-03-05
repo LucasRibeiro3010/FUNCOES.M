@@ -14,7 +14,7 @@ let
     each Table.FromRecords(
       {
         [
-          ID         = Date.ToText([Column1],"ddMMyyyy"),
+          DATA_ID         = Date.ToText([Column1],"ddMMyyyy"),
           DIA        = Date.Day([Column1]),
           ANO        = Date.Year([Column1]),
           ANO_MÊS    = Date.ToText([Column1],"yyyy-MM",
