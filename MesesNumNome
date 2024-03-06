@@ -1,0 +1,28 @@
+let
+    Fonte = 
+    Table.FromRecords(
+        {
+            [MesNum = 1, MesNome = "Janeiro"],
+            [MesNum = 2, MesNome = "Fevereiro"],
+            [MesNum = 3, MesNome = "Março"],
+            [MesNum = 4, MesNome = "Abril"],
+            [MesNum = 5, MesNome = "Maio"],
+            [MesNum = 6, MesNome = "Junho"],
+            [MesNum = 7, MesNome = "Julho"],
+            [MesNum = 8, MesNome = "Agosto"],
+            [MesNum = 9, MesNome = "Setembro"],
+            [MesNum = 10, MesNome = "Outubro"],
+            [MesNum = 11, MesNome = "Novembro"],
+            [MesNum = 12, MesNome = "Dezembro"]
+        }
+    ),
+    TipoAlterado =
+    Table.TransformColumnTypes(
+        Fonte,
+            {
+                {"MesNum", Int64.Type}, 
+                {"MesNome", type text}
+            }
+    )
+in
+    TipoAlterado
