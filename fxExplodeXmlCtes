@@ -1,0 +1,91 @@
+(
+  Caminho as text
+)=>
+      let
+      /*---------------FONTE VARIAVEL FUNCAO---------*/
+      Fonte = Xml.Tables(File.Contents(Caminho))[[CTe]],
+
+      /*---------------FONTE DO XML DIRETO-------------
+        Fonte = Xml.Tables(
+          File.Contents(
+            "C:\Users\user\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Xmls Transportadoras\Ti Log\Março\Uberaba 26-03\135241140294516-procCTe.xml"
+          )
+        )[[CTe]],
+      ------------------------------------------------*/
+
+        CTeExpandido = Table.ExpandTableColumn(Fonte, "CTe", {"infCte"}, {"infCte"}),
+        infCteExpandido = Table.ExpandTableColumn(
+          CTeExpandido,
+          "infCte",
+          {
+            "ide",
+            "compl",
+            "emit",
+            "rem",
+            "dest",
+            "vPrest",
+            "imp",
+            "infCTeNorm",
+            "autXML",
+            "infRespTec",
+            "Attribute:Id",
+            "Attribute:versao"
+          },
+          {
+            "ide",
+            "compl",
+            "emit",
+            "rem",
+            "dest",
+            "vPrest",
+            "imp",
+            "infCTeNorm",
+            "autXML",
+            "infRespTec",
+            "Attribute:Id",
+            "Attribute:versao"
+          }
+        ),
+        ideExpandido = Table.ExpandTableColumn(infCteExpandido, "ide", {"nCT", "dhEmi"}, {"nCT", "dhEmi"}),
+        emitExpandido = Table.ExpandTableColumn(ideExpandido, "emit", {"xNome"}, {"xNome"}),
+        remExpandido = Table.ExpandTableColumn(emitExpandido, "rem", {"CNPJ"}, {"rem.CNPJ"}),
+        destExpandido = Table.ExpandTableColumn(remExpandido, "dest", {"CNPJ"}, {"dest.CNPJ"}),
+        vPrestExpandido = Table.ExpandTableColumn(destExpandido, "vPrest", {"vTPrest"}, {"vTPrest"}),
+        impExpandido = Table.ExpandTableColumn(vPrestExpandido, "imp", {"ICMS"}, {"ICMS"}),
+        ICMSExpandido = Table.ExpandTableColumn(impExpandido, "ICMS", {"ICMS00"}, {"ICMS00"}),
+        ICMS00Expandido = Table.ExpandTableColumn(ICMSExpandido, "ICMS00", {"vICMS"}, {"vICMS"}),
+        #"infCTeNorm Expandido" = Table.ExpandTableColumn(
+          ICMS00Expandido,
+          "infCTeNorm",
+          {"infCarga"},
+          {"infCarga"}
+        ),
+        infCargaExpandido = Table.ExpandTableColumn(
+          #"infCTeNorm Expandido",
+          "infCarga",
+          {"vCarga", "infQ"},
+          {"vCarga", "infQ"}
+        ),
+        TabelaVolumes = Table.AddColumn(
+          infCargaExpandido,
+          "InfQ.1",
+          each Table.SelectRows([infQ], each [cUnid] = "03") 
+        ),
+        VolumesExpandio = Table.ExpandTableColumn(TabelaVolumes, "InfQ.1", {"qCarga"}, {"qCarga"}),
+        ColunasSelecionadas = Table.SelectColumns(
+          VolumesExpandio,
+          {"nCT", "dhEmi", "rem.CNPJ", "dest.CNPJ", "vTPrest", "vICMS", "vCarga", "qCarga"}
+        ),
+        ColunasRenomeadas = Table.RenameColumns(
+          ColunasSelecionadas,
+          {
+            {"nCT", "CRTC"},
+            {"dhEmi", "DATA_FRETE"},
+            {"vTPrest", "FRETEVALOR"},
+            {"vICMS", "VALORICMS"},
+            {"vCarga", "SOMA_NOTAS"},
+            {"qCarga", "SOMA_VOLUMES"}
+          }
+        )
+      in
+        ColunasRenomeadas
