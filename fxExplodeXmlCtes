@@ -1,18 +1,19 @@
 (
-  Caminho as text
+        Caminho as text
 )=>
       let
-      /*---------------FONTE VARIAVEL FUNCAO---------*/
-      Fonte = Xml.Tables(File.Contents(Caminho))[[CTe]],
 
-      /*---------------FONTE DO XML DIRETO-------------
+
+
+        /*---------------FONTE VARIAVEL FUNCAO---------*/
+        Fonte = Xml.Tables(File.Contents(Caminho))[[CTe]],
+        /*---------------FONTE DO XML DIRETO-------------
         Fonte = Xml.Tables(
           File.Contents(
             "C:\Users\user\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Xmls Transportadoras\Ti Log\Março\Uberaba 26-03\135241140294516-procCTe.xml"
           )
         )[[CTe]],
-      ------------------------------------------------*/
-
+        ------------------------------------------------*/
         CTeExpandido = Table.ExpandTableColumn(Fonte, "CTe", {"infCte"}, {"infCte"}),
         infCteExpandido = Table.ExpandTableColumn(
           CTeExpandido,
@@ -48,9 +49,11 @@
         ),
         ideExpandido = Table.ExpandTableColumn(infCteExpandido, "ide", {"nCT", "dhEmi"}, {"nCT", "dhEmi"}),
         emitExpandido = Table.ExpandTableColumn(ideExpandido, "emit", {"xNome"}, {"xNome"}),
-        remExpandido = Table.ExpandTableColumn(emitExpandido, "rem", {"CNPJ"}, {"rem.CNPJ"}),
-        destExpandido = Table.ExpandTableColumn(remExpandido, "dest", {"CNPJ"}, {"dest.CNPJ"}),
-        vPrestExpandido = Table.ExpandTableColumn(destExpandido, "vPrest", {"vTPrest"}, {"vTPrest"}),
+        remExpandido = Table.ExpandTableColumn(emitExpandido, "rem", {"CNPJ", "enderReme"}, {"rem.CNPJ", "rem.enderReme"}),
+    rem.enderRemeExpandido = Table.ExpandTableColumn(remExpandido, "rem.enderReme", {"xMun", "UF"}, {"rem.enderReme.xMun", "rem.enderReme.UF"}),
+        destExpandido = Table.ExpandTableColumn(rem.enderRemeExpandido, "dest", {"CNPJ", "enderDest"}, {"dest.CNPJ", "dest.enderDest"}),
+    dest.enderDestExpandido = Table.ExpandTableColumn(destExpandido, "dest.enderDest", {"xMun", "UF"}, {"xMun", "UF"}),
+        vPrestExpandido = Table.ExpandTableColumn(dest.enderDestExpandido, "vPrest", {"vTPrest"}, {"vTPrest"}),
         impExpandido = Table.ExpandTableColumn(vPrestExpandido, "imp", {"ICMS"}, {"ICMS"}),
         ICMSExpandido = Table.ExpandTableColumn(impExpandido, "ICMS", {"ICMS00"}, {"ICMS00"}),
         ICMS00Expandido = Table.ExpandTableColumn(ICMSExpandido, "ICMS00", {"vICMS"}, {"vICMS"}),
@@ -69,23 +72,29 @@
         TabelaVolumes = Table.AddColumn(
           infCargaExpandido,
           "InfQ.1",
-          each Table.SelectRows([infQ], each [cUnid] = "03") 
+          each Table.SelectRows([infQ], each [cUnid] = "03")
         ),
         VolumesExpandio = Table.ExpandTableColumn(TabelaVolumes, "InfQ.1", {"qCarga"}, {"qCarga"}),
-        ColunasSelecionadas = Table.SelectColumns(
-          VolumesExpandio,
-          {"nCT", "dhEmi", "rem.CNPJ", "dest.CNPJ", "vTPrest", "vICMS", "vCarga", "qCarga"}
-        ),
-        ColunasRenomeadas = Table.RenameColumns(
-          ColunasSelecionadas,
+        ColunasSelecionadas = Table.SelectColumns(VolumesExpandio,{"nCT", "dhEmi", "xNome", "rem.CNPJ", "rem.enderReme.xMun", "rem.enderReme.UF", "dest.CNPJ", "xMun", "UF", "vTPrest", "vICMS", "vCarga", "qCarga"}),
+        ColunasRenomeadas = Table.RenameColumns(ColunasSelecionadas,{{"nCT", "CRTC"}, {"dhEmi", "DATA_FRETE"}, {"vTPrest", "FRETEVALOR"}, {"vICMS", "VALORICMS"}, {"vCarga", "SOMA_NOTAS"}, {"qCarga", "SOMA_VOLUMES"}, {"xNome", "TRANSPORTADORA"}, {"rem.enderReme.xMun", "COLETA_MUN"}, {"rem.enderReme.UF", "COLETA_UF"}, {"xMun", "ENTREGA_MUNICIPIO"}, {"UF", "ENTREGA_UF"}}),
+        DataArrumada =Table.TransformColumns(
+          ColunasRenomeadas, 
           {
-            {"nCT", "CRTC"},
-            {"dhEmi", "DATA_FRETE"},
-            {"vTPrest", "FRETEVALOR"},
-            {"vICMS", "VALORICMS"},
-            {"vCarga", "SOMA_NOTAS"},
-            {"qCarga", "SOMA_VOLUMES"}
+            {
+              "DATA_FRETE", each Text.BeforeDelimiter(_, "T"), type text
+            }
           }
+        ),
+        ValoresArrumados= Table.ReplaceValue(
+          DataArrumada,
+          ".",
+          ",",
+          Replacer.ReplaceText,
+            {"FRETEVALOR", 
+            "VALORICMS", 
+            "SOMA_NOTAS", 
+            "SOMA_VOLUMES"
+            }
         )
       in
-        ColunasRenomeadas
+        ValoresArrumados
