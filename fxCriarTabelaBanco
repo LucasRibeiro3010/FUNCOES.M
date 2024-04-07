@@ -1,0 +1,49 @@
+(
+  Tabela as table,
+  NomeTabelaNova as text
+)   =>
+    
+    let
+      //Fonte = zExtrato,
+      ManterPrimeiraLinha = Table.FirstN(Tabela, 1),
+      ColunsDespivotadas = Table.UnpivotOtherColumns(ManterPrimeiraLinha, {}, "Atributo", "Valor"),
+      _Tabela = Table.RemoveColumns(
+        Table.AddColumn(ColunsDespivotadas, "TiposDados", each Value.Type([Valor])),
+        {"Valor"}
+      ),
+      TabelasTipos = Table.FromRecords(
+        {
+          [Tipos = type number, Nome = "Float"],
+          [Tipos = type text, Nome = "Varchar(50)"],
+          [Tipos = Int64.Type, Nome = "Int"],
+          [Tipos = Currency.Type, Nome = "Float"],
+          [Tipos = type date, Nome = "Date"],
+          [Tipos = type datetime, Nome = "DateTime"]
+        }
+      ),
+      MesclaTabelaTipos = Table.NestedJoin(
+        _Tabela,
+        {"TiposDados"},
+        TabelasTipos,
+        {"Tipos"},
+        "TabelasTipos",
+        JoinKind.LeftOuter
+      ),
+      TabelasTiposExpandido = Table.RemoveColumns(
+        Table.ExpandTableColumn(MesclaTabelaTipos, "TabelasTipos", {"Nome"}, {"Nome"}),
+        {"TiposDados"}
+      ),
+      Lista = Table.AddColumn(
+        TabelasTiposExpandido,
+        "CriacaoTabela",
+        each """" & [Atributo] & """" & " " & [Nome]
+      )[CriacaoTabela],
+      TabelaUmaLinha = Table.FromRecords({[Coluna = 1]}),
+      ListaChamada = Table.AddColumn(TabelaUmaLinha, "Valores", each Lista)[[Valores]],
+      ListaExtraida = Table.TransformColumns(
+        ListaChamada,
+        {"Valores", each Text.Combine(List.Transform(_, Text.From), " , "), type text}
+      )[Valores]{0},
+      ComandoFinal = "CREATE TABLE "&NomeTabelaNova&" (" & ListaExtraida & " )"
+    in
+      ComandoFinal
