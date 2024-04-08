@@ -10,7 +10,7 @@
         /*---------------FONTE DO XML DIRETO-------------
         Fonte = Xml.Tables(
           File.Contents(
-            "C:\Users\user\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Xmls Transportadoras\Ti Log\Março\Uberaba 26-03\135241140294516-procCTe.xml"
+            "C:\Users\lucas.ribeiro\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Xmls Transportadoras\Teste\746-748\Nova pasta\135240767698067-procCTe.xml"
           )
         )[[CTe]],
         ------------------------------------------------*/
@@ -72,7 +72,7 @@
         TabelaVolumes = Table.AddColumn(
           infCargaExpandido,
           "InfQ.1",
-          each Table.SelectRows([infQ], each [cUnid] = "03")
+          each try Table.SelectRows([infQ], each [cUnid] = "03") otherwise null
         ),
         VolumesExpandio = Table.ExpandTableColumn(TabelaVolumes, "InfQ.1", {"qCarga"}, {"qCarga"}),
         ColunasSelecionadas = Table.SelectColumns(VolumesExpandio,{"nCT", "dhEmi", "xNome", "rem.CNPJ", "rem.enderReme.xMun", "rem.enderReme.UF", "dest.CNPJ", "xMun", "UF", "vTPrest", "vICMS", "vCarga", "qCarga"}),
