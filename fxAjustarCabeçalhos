@@ -48,17 +48,20 @@ let
                         Description = "descricao do exemplo 1",
                         Code = "
                         funcao(
+                          ---------------------------------
                           |data de nascimento|nome completo|
                           |30/10/1999        |lucas ribeiro|
                           ---------------------------------
-                          ,_,
+                          ,"_",
 
-                          sim
+                          "sim"
                         )
                           ",
-                        Result = "                     
+                        Result = " 
+                          ---------------------------------                    
                           |DATA_DE_NASCIMENTO|NOME_COMPLETO|
                           |30/10/1999        |lucas ribeiro|
+                           ---------------------------------
                         "
                     ],
 
@@ -67,17 +70,20 @@ let
                         Description = "descricao do exemplo 2",
                       Code = "
                         funcao(
+                          ---------------------------------
                           |data de nascimento|nome completo|
                           |30/10/1999        |lucas ribeiro|
                           ---------------------------------
-                          ,--,
+                          ,"--",
 
-                          não
+                          "não"
                         )
                           ",
-                        Result = "                     
+                        Result = "      
+                           ----------------------------------
                           |Data--De--Nascimento|Nome--Completo|
                           |30/10/1999          |lucas ribeiro |
+                           ----------------------------------
                         "
                     ]                    
                 }
