@@ -1,42 +1,31 @@
-let 
-  ListaDatas =
-        (
-          DataIni as date,
-          DataFim as date
-        )=> 
-        List.Dates(
-        DataIni,
-        Duration.Days(DataFim-DataIni)+1,
-        #duration(1,0,0,0)
-        ),
-  _ini =#date (2024,01,01),
-  _fim =#date (2024,12,31),
+let
+  ListaDatas = (DataIni as date, DataFim as date) =>
+    List.Dates(DataIni, Duration.Days(DataFim - DataIni) + 1, #duration(1, 0, 0, 0)),
+  _ini = #date(2022,01,01),
+  _fim = #date(2024,1231),
   Fonte = ListaDatas(_ini, _fim),
-  #"Convertido para Tabela" = Table.FromList(
-    Fonte,
-    Splitter.SplitByNothing(),
-    null,
-    null,
-    ExtraValues.Error
-  ),
-  #"Tipo Alterado" = Table.TransformColumnTypes(#"Convertido para Tabela", {{"Column1", type date}}),
+  ListaParaTabela = Table.FromList(Fonte, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+  #"Tipo Alterado" = Table.TransformColumnTypes(ListaParaTabela, {{"Column1", type date}}),
   Tabela = Table.AddColumn(
     #"Tipo Alterado",
     "Outros",
     each Table.FromRecords(
       {
         [
-          DATA_ID         = Date.ToText([Column1],"ddMMyyyy"),
-          DIA        = Date.Day([Column1]),
-          ANO        = Date.Year([Column1]),
-          ANO_MÊS    = Date.ToText([Column1],"yyyy-MM"),
-          BIMESTRE   = Number.RoundUp(Date.Month([Column1]) / 2, 0),
-          NOME_MES   = Date.MonthName([Column1]),
-          NUM_MÊS    = Date.Month([Column1]),
+          DATA_ID = Date.ToText([Column1], "ddMMyyyy"),
+          DIA = Date.Day([Column1]),
+          ANO = Date.Year([Column1]),
+          ANO_MÊS = Date.ToText([Column1], "yyyy-MM"),
+          BIMESTRE = Number.RoundUp(Date.Month([Column1]) / 2, 0),
+          NOME_MES = Date.MonthName([Column1]),
+          NUM_MÊS = Date.Month([Column1]),
           SEMANA_ANO = Date.WeekOfYear([Column1]),
-          NOME_DIA   = Date.DayOfWeekName([Column1]),
-          FIM_MÊS    = Date.EndOfMonth([Column1]),
-          INICIO_MÊS = Date.EndOfMonth([Column1])
+          NOME_DIA = Date.DayOfWeekName([Column1]),
+          FIM_MÊS = Date.EndOfMonth([Column1]),
+          INICIO_MÊS = Date.EndOfMonth([Column1]),
+          ANO_NOME_MÊS = Text.Proper(
+            Date.MonthName([Column1]) & " de " & Text.From(Date.Year([Column1]))
+          )
         ]
       }
     )
@@ -44,14 +33,14 @@ let
   _nomes_colunas = Table.AddColumn(Tabela, "Personalizar", each Table.ColumnNames([Outros])){0}[
     Personalizar
   ],
-  Personalizar1 = Tabela,
+  TabelaCriada = Tabela,
   #"Outros Expandido" = Table.ExpandTableColumn(
-    Personalizar1,
+    TabelaCriada,
     "Outros",
     _nomes_colunas,
     _nomes_colunas
   ),
-  #"Tipo Alterado1" = Table.TransformColumnTypes(
+  TipoAlterado2 = Table.TransformColumnTypes(
     #"Outros Expandido",
     {
       {"SEMANA_ANO", Int64.Type},
@@ -62,9 +51,12 @@ let
       {"INICIO_MÊS", type date},
       {"FIM_MÊS", type date},
       {"DIA", Int64.Type},
-      {"DATA_ID", type text}
+      {"DATA_ID", type text},
+      {"ANO_MÊS", type text},
+      {"NUM_MÊS", Int64.Type},
+      {"ANO_NOME_MÊS", type text}
     }
   ),
-Renomear = Table.RenameColumns(#"Tipo Alterado1",{{"Column1", "DATA"}})
+  Renomear = Table.RenameColumns(TipoAlterado2, {{"Column1", "DATA"}})
 in
   Renomear
