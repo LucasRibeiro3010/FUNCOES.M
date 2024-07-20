@@ -2,7 +2,7 @@ let
   ListaDatas = (DataIni as date, DataFim as date) =>
     List.Dates(DataIni, Duration.Days(DataFim - DataIni) + 1, #duration(1, 0, 0, 0)),
   _ini = #date(2022,01,01),
-  _fim = #date(2024,1231),
+  _fim = #date(2024,12,31),
   Fonte = ListaDatas(_ini, _fim),
   ListaParaTabela = Table.FromList(Fonte, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
   #"Tipo Alterado" = Table.TransformColumnTypes(ListaParaTabela, {{"Column1", type date}}),
