@@ -1,0 +1,60 @@
+= (
+    TabelaAntes as table,
+    TabelaDepois as table,
+    ListaRelacionamento as list
+    
+
+) =>
+
+let
+
+  Fonte = TabelaAntes,
+  _DePara = TabelaDepois,
+  ConsultasMescladas = Table.NestedJoin(
+    Fonte,
+    ListaRelacionamento,
+    _DePara,
+    ListaRelacionamento,
+    "DePara",
+    JoinKind.Inner
+  ),
+  DeParaSelecionado = ConsultasMescladas[[DePara]],
+  ColunaExpandida = DeParaSelecionado{0}[DePara],
+  ListaParaColunas = Table.AddColumn(
+    Table.FromList(Table.ColumnNames(_DePara)),
+    "ListaTipos",
+    each {[Column1], type text}
+  )[ListaTipos],
+  TipoAlteradoB = Table.TransformColumnTypes(ColunaExpandida, ListaParaColunas),
+  ChaveCriadaB = Table.CombineColumns(
+    TipoAlteradoB,
+    ListaRelacionamento,
+    Combiner.CombineTextByDelimiter("-", QuoteStyle.None),
+    "Chave"
+  )[Chave],
+  TipoAlteradoA = Table.TransformColumnTypes(Fonte, ListaParaColunas),
+  IndiceAdicionado = Table.AddIndexColumn(TipoAlteradoA, "Indice", 0, 1, type text),
+  TabelaA = IndiceAdicionado,
+  TabelaComChave = Table.CombineColumns(
+    TabelaA,
+    ListaRelacionamento,
+    Combiner.CombineTextByDelimiter("-", QuoteStyle.None),
+    "Chave"
+  ),
+  ChaveMesclada = Table.NestedJoin(
+    TabelaA,
+    {"Indice"},
+    TabelaComChave,
+    {"Indice"},
+    "TabelaComChave",
+    JoinKind.LeftOuter
+  ),
+  ChaveExpandida = Table.ExpandTableColumn(ChaveMesclada, "TabelaComChave", {"Chave"}, {"Chave.1"}),
+  LinhasFiltradas = Table.RemoveColumns(
+    Table.SelectRows(ChaveExpandida, each not List.Contains(ChaveCriadaB, [Chave.1])),
+    {"Indice", "Chave.1"}
+  ),
+  TabelaAPronta = LinhasFiltradas,
+  FinalFuncao = Table.Combine({_DePara, TabelaAPronta})
+in
+  FinalFuncao
