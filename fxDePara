@@ -1,7 +1,7 @@
 (
-    TabelaAntes as table,
-    TabelaDepois as table,
-    ListaRelacionamento as list
+    TabelaAntes as table, /*--- tabela com os valores antigos a serem substituidos---*/
+    TabelaDepois as table, /*---tabela com os valores novos a serem adicionados na TabelaAntes---*/
+    ListaRelacionamento as list /* ---serve para relacionar as tabelas A e B para realizar a subistituição dos valores---*/
     
 
 ) =>
