@@ -1,4 +1,4 @@
-= (
+(
     TabelaAntes as table,
     TabelaDepois as table,
     ListaRelacionamento as list
@@ -8,26 +8,32 @@
 
 let
 
-  Fonte = TabelaAntes,
-  _DePara = TabelaDepois,
+  Fonte = //Fretes_ConsolidadosTeste,
+  TabelaAntes,
+  _DePara = //De_Para,
+  TabelaDepois,
   ConsultasMescladas = Table.NestedJoin(
     Fonte,
+    //{"COD_FILIAL_EMIT", "FILIAL_EMIT", "CTRC", "COD_FILIAL", "FILIAL", "TRANSPORTADORA"},
     ListaRelacionamento,
     _DePara,
+    //{"COD_FILIAL_EMIT", "FILIAL_EMIT", "CTRC", "COD_FILIAL", "FILIAL", "TRANSPORTADORA"},
     ListaRelacionamento,
     "DePara",
     JoinKind.Inner
   ),
   DeParaSelecionado = ConsultasMescladas[[DePara]],
-  ColunaExpandida = DeParaSelecionado{0}[DePara],
+    ColunasParaExpansao = Table.ColumnNames(Fonte),
+    DeParaExpandido = Table.Buffer( Table.ExpandTableColumn(DeParaSelecionado, "DePara", ColunasParaExpansao, ColunasParaExpansao) ),
   ListaParaColunas = Table.AddColumn(
     Table.FromList(Table.ColumnNames(_DePara)),
     "ListaTipos",
     each {[Column1], type text}
   )[ListaTipos],
-  TipoAlteradoB = Table.TransformColumnTypes(ColunaExpandida, ListaParaColunas),
+  TipoAlteradoB = Table.TransformColumnTypes(DeParaExpandido, ListaParaColunas),
   ChaveCriadaB = Table.CombineColumns(
     TipoAlteradoB,
+    //{"COD_FILIAL_EMIT", "FILIAL_EMIT", "CTRC", "COD_FILIAL", "FILIAL", "TRANSPORTADORA"},
     ListaRelacionamento,
     Combiner.CombineTextByDelimiter("-", QuoteStyle.None),
     "Chave"
@@ -37,6 +43,7 @@ let
   TabelaA = IndiceAdicionado,
   TabelaComChave = Table.CombineColumns(
     TabelaA,
+    //{"COD_FILIAL_EMIT", "FILIAL_EMIT", "CTRC", "COD_FILIAL", "FILIAL", "TRANSPORTADORA"},
     ListaRelacionamento,
     Combiner.CombineTextByDelimiter("-", QuoteStyle.None),
     "Chave"
@@ -50,11 +57,12 @@ let
     JoinKind.LeftOuter
   ),
   ChaveExpandida = Table.ExpandTableColumn(ChaveMesclada, "TabelaComChave", {"Chave"}, {"Chave.1"}),
+    Buffer = Table.Buffer(ChaveExpandida),
   LinhasFiltradas = Table.RemoveColumns(
-    Table.SelectRows(ChaveExpandida, each not List.Contains(ChaveCriadaB, [Chave.1])),
+    Table.SelectRows(Buffer, each not List.Contains(ChaveCriadaB, [Chave.1])),
     {"Indice", "Chave.1"}
   ),
   TabelaAPronta = LinhasFiltradas,
   FinalFuncao = Table.Combine({_DePara, TabelaAPronta})
 in
-  FinalFuncao
+    FinalFuncao
