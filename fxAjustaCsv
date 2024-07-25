@@ -1,27 +1,19 @@
-(Caminho as text) =>
-  let
-
-    //Caminho = "C:\Users\user\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Cartão Atual\Cartão Novo\zDespesas\2023\Despesas.csv",
-    Fonte = Csv.Document(
-      File.Contents(Caminho),
-      [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.None]
-    )[[Column1]],
-    Colunas = List.Transform(
-      List.ReplaceValue(Text.Split(Fonte[Column1]{0}, ","), """", "", Replacer.ReplaceText),
-      each Text.Upper(_)
-    ),
-    ColunasDividas = Table.SplitColumn(
-      Fonte,
-      "Column1",
-      Splitter.SplitTextByDelimiter(",", QuoteStyle.Csv),
-      Colunas
-    ),
-    tipagem = Table.AddColumn(
-      Table.FromList(Colunas),
-      "Transformar",
-      each {[Column1], Text.Trim, type text}
-    )[Transformar],
-    TextoAparado = Table.TransformColumns(ColunasDividas, tipagem),
-    CabecalhosPromovidos = Table.Skip(TextoAparado)
-  in
-    CabecalhosPromovidos
+(
+  Caminho as text,
+  QtdColunas as number
+) =>
+let
+  //Caminho = "C:\Users\lucas.ribeiro\OneDrive - KEY-WEST PROCESSAMENTO DE DADOS E ASSESSORIA LTDA\Cartão Atual\02-Controle após Junho de 2024\Cartão Novo\zDespesas\2023\Despesas 2023.csv", 
+  //QtdColunas = 50, 
+  Fonte = Csv.Document(
+    File.Contents(Caminho), 
+    [Delimiter = ",", Columns = QtdColunas, Encoding = 65001, QuoteStyle = QuoteStyle.None]
+  ), 
+  CabecalhosPromovidos = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]), 
+  Colunas = List.Select(
+    Table.ColumnNames(CabecalhosPromovidos), 
+    each Text.Start(_, 1) <> "_" and _ <> ""
+  ), 
+  ColunasSelecionadas = Table.SelectColumns(CabecalhosPromovidos, Colunas)
+in
+  ColunasSelecionadas
