@@ -1,8 +1,8 @@
 let
   ListaDatas = (DataIni as date, DataFim as date) =>
     List.Dates(DataIni, Duration.Days(DataFim - DataIni) + 1, #duration(1, 0, 0, 0)),
-  _ini = #date(2022,01,01),
-  _fim = #date(2024,12,31),
+  _ini = #date(2022, 01, 01),
+  _fim = #date(2024, 12, 31),
   Fonte = ListaDatas(_ini, _fim),
   ListaParaTabela = Table.FromList(Fonte, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
   #"Tipo Alterado" = Table.TransformColumnTypes(ListaParaTabela, {{"Column1", type date}}),
@@ -23,9 +23,12 @@ let
           NOME_DIA = Date.DayOfWeekName([Column1]),
           FIM_MÊS = Date.EndOfMonth([Column1]),
           INICIO_MÊS = Date.EndOfMonth([Column1]),
-          ANO_NOME_MÊS = Text.Proper(Date.MonthName([Column1]) & " de " & Text.From(Date.Year([Column1]))),
-          MES_ANO = Text.Proper( Text.Start(Date.MonthName([Column1]),3) ) & "-" & Text.End( Text.From(Date.Year([Column1])) ,2)
-          
+          ANO_NOME_MÊS = Text.Proper(
+            Date.MonthName([Column1]) & " de " & Text.From(Date.Year([Column1]))
+          ),
+          MES_ANO = Text.Proper(Text.Start(Date.MonthName([Column1]), 3))
+            & "-"
+            & Text.End(Text.From(Date.Year([Column1])), 2)
         ]
       }
     )
@@ -40,7 +43,24 @@ let
     _nomes_colunas,
     _nomes_colunas
   ),
-  TipoAlterado2 = Table.TransformColumnTypes(#"Outros Expandido",{{"SEMANA_ANO", Int64.Type}, {"BIMESTRE", Int64.Type}, {"ANO", Int64.Type}, {"NOME_MES", type text}, {"NOME_DIA", type text}, {"INICIO_MÊS", type date}, {"FIM_MÊS", type date}, {"DIA", Int64.Type}, {"DATA_ID", type text}, {"ANO_MÊS", type text}, {"NUM_MÊS", Int64.Type}, {"ANO_NOME_MÊS", type text}, {"MES_ANO", type text}}),
+  TipoAlterado2 = Table.TransformColumnTypes(
+    #"Outros Expandido",
+    {
+      {"SEMANA_ANO", Int64.Type},
+      {"BIMESTRE", Int64.Type},
+      {"ANO", Int64.Type},
+      {"NOME_MES", type text},
+      {"NOME_DIA", type text},
+      {"INICIO_MÊS", type date},
+      {"FIM_MÊS", type date},
+      {"DIA", Int64.Type},
+      {"DATA_ID", type text},
+      {"ANO_MÊS", type text},
+      {"NUM_MÊS", Int64.Type},
+      {"ANO_NOME_MÊS", type text},
+      {"MES_ANO", type text}
+    }
+  ),
   Renomear = Table.RenameColumns(TipoAlterado2, {{"Column1", "DATA"}})
 in
   Renomear
