@@ -1,0 +1,19 @@
+(
+    Tabela as table,  // É A TABELA QUE CONTEM A COLUNA CUJO OS VALORES SERÃO SUBSTITUIDOS
+    ColunaDe as text,  // NOME ESCRITO DA COLUNA CUJO OS DADOS SERÃO SUBSTITUIDOS
+    ColunaPara as text // NOME ESCRITO DA COLUNA CUJO OS VALORES SUBSTITUIRÃO A ColunaDe
+) =>
+  let
+    Subistituicao = Table.ReplaceValue(
+      Tabela,
+      each Record.Field(_, ColunaDe),
+      each
+        if Record.Field(_, ColunaPara) = null then
+          Record.Field(_, ColunaDe)
+        else
+          Record.Field(_, ColunaPara),
+      Replacer.ReplaceValue,
+      {"" & ColunaDe & ""}
+    )
+  in
+    Subistituicao
