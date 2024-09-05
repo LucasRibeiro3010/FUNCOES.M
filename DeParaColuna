@@ -1,6 +1,7 @@
 (
     Tabela as table,  // É A TABELA QUE CONTEM A COLUNA CUJO OS VALORES SERÃO SUBSTITUIDOS
     ColunaDe as text,  // NOME ESCRITO DA COLUNA CUJO OS DADOS SERÃO SUBSTITUIDOS
+    TipoDadosColunaDe as type, // É O TIPO DE DADO PARA FORMATAR A ColunaDe
     ColunaPara as text // NOME ESCRITO DA COLUNA CUJO OS VALORES SUBSTITUIRÃO A ColunaDe
 ) =>
   let
@@ -15,6 +16,6 @@
       Replacer.ReplaceValue,
       {"" & ColunaDe & ""}
     ),
-    Tipagem= Table.TransformColumnTypes(Subistituicao,{{ColunaDe, Int64.Type}})
+    Tipagem= Table.TransformColumnTypes(Subistituicao,{{ColunaDe, TipoDadosColunaDe}})
   in
     Tipagem
