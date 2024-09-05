@@ -14,6 +14,7 @@
           Record.Field(_, ColunaPara),
       Replacer.ReplaceValue,
       {"" & ColunaDe & ""}
-    )
+    ),
+    Tipagem= Table.TransformColumnTypes(Subistituicao,{{ColunaDe, Int64.Type}})
   in
-    Subistituicao
+    Tipagem
