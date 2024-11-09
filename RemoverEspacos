@@ -1,12 +1,16 @@
 (Texto as text) =>
 
 let
-    _Texto =Texto,
+  
+   _Texto =Texto,
     espaco = " ",
     ListaNome = Text.Split(_Texto,espaco),
-    EspacoRemovido = List.Select(
+    EspacoRemovido = List.Transform(
+ List.Select(
         ListaNome,
         each _ <> ""),
+each Text.Trim(_)
+),
     Final = Text.Combine(EspacoRemovido,espaco)
 in
     Final
