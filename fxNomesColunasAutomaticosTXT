@@ -1,0 +1,29 @@
+let
+  Fonte = Csv.Document(
+    File.Contents(
+      "C:\Users\user\OneDrive\Área de Trabalho\One Drive Pessoal\OneDrive\Área de Trabalho\Power Query 2.0\Faixa Preta Power Bi\Aula\projeto_estoque_final_ano_anterior - Copia.txt"
+    ),
+    [Delimiter = ":", Columns = 1, Encoding = 65001, QuoteStyle = QuoteStyle.None]
+  ),
+  LinhasSelecionadas = Table.Skip(Fonte, 12),
+  Delimitador = "|",
+  NumeroColunas = List.Count(
+    Text.Split(Table.FirstN(LinhasSelecionadas, 1)[Column1]{0}, Delimitador)
+  ),
+  ColunasNomes = Table.AddColumn(
+    Table.FromList(
+      List.Transform(List.Numbers(1, NumeroColunas), each Text.From(_)),
+      null,
+      {"Coluna"}
+    ),
+    "Lista",
+    each "Coluna." & [Coluna]
+  )[Lista],
+  DividirColuna = Table.SplitColumn(
+    LinhasSelecionadas,
+    "Column1",
+    Splitter.SplitTextByDelimiter("|", QuoteStyle.Csv),
+    ColunasNomes
+  )
+in
+  DividirColuna
