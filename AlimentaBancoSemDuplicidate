@@ -7,7 +7,7 @@ let
             DECLARE @DATA_ULTIMA_GRAVACAO_DESLOCADA DATETIME =
                 DATEADD(
                   s, // SEGUINIFICA PARA AVANÇAR SEGUNDOS
-                  "Text.From(SegundosDelay)&",
+                  "&Text.From(SegundosDelay)&",
                   ISNULL(
                       (SELECT MAX(DATA_HORA_GRAVAÇÃO) FROM "NOME DA TABELA") // A COLUNA QUE IREMOS PEGAR DE PARAMETRO PODE SER DE DATA, ID OU QUALQUER OUTRA QUE FAÇA SENTIDO
             DECLARE @DATA_ATUAL DATETIME = GATEDATE() 
