@@ -63,7 +63,7 @@ let
             DateDateAtualizado = Table.AddColumn(TextoExtraido, "COMANDO_NOVO", each 
                 if [BIN] = 0 
                 then [COMANDO] & ", DATA_INSERT )"
-                else [COMANDO] &", GATEDATE())")[[COMANDO_NOVO]]
+                else [COMANDO] &", GETDATE())")[[COMANDO_NOVO]]
 
 
         in
