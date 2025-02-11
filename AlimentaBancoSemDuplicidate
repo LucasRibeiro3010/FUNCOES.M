@@ -1,0 +1,34 @@
+let
+    SegundosDelay = 60*10, // SERÁ A QUANTIDADE DE SEGUNDOS APÓS A INSERÇÃO O SQL ESPERARA PARA INSERIR OS DADOS NOVAMENTE
+    Fonte =
+          Sql.Database("NOME DO SERVIDOR", "NOME DO BANCO", [Query=
+            "
+                ---CARREGANDO AS VARIAVEIS DE TESTE INCREMENTAL-----
+            DECLARE @DATA_ULTIMA_GRAVACAO_DESLOCADA DATETIME =
+                DATEADD(
+                  s, // SEGUINIFICA PARA AVANÇAR SEGUNDOS
+                  "Text.From(SegundosDelay)&",
+                  ISNULL(
+                      (SELECT MAX(DATA_HORA_GRAVAÇÃO) FROM "NOME DA TABELA") // A COLUNA QUE IREMOS PEGAR DE PARAMETRO PODE SER DE DATA, ID OU QUALQUER OUTRA QUE FAÇA SENTIDO
+            DECLARE @DATA_ATUAL DATETIME = GATEDATE() 
+  
+            ---------INICIANDO A INSERÇÃO NA TABELA------------
+          BEGIN 
+                IF @DATA_ATUAL > @DATA_ULTIMA_GRAVACAO_DESLOCADA
+                    BEGIN
+                        "COMANDO DE INSERÇÃO DE DADOS"
+                    END
+                ELSE SELECT 'Records Affected=0'
+          END 
+
+      "])
+
+in
+  Fonte
+
+
+
+
+
+
+in
