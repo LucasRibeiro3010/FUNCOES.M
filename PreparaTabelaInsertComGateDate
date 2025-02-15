@@ -12,8 +12,8 @@ let
 
         let
             //NomeTabelaInserirDados = "Lixo",
-            //Tabela = XmlsPlan,
-            Linha = Table.AddIndexColumn(Tabela, "Linha", 1, 1, Int64.Type),
+            //Tabela = Lixo,
+    Linha = Table.AddIndexColumn(Tabela, "Linha", 1, 1, Int64.Type),
 
             // aqui trabalhamos com as informações dos VALUES
             #"---Inicio Tratamento Tabela Informações" = "",
@@ -31,7 +31,7 @@ let
             Valores_Miolo = Table.CombineColumns(SubstituirVirgulaPonto,Colunas,Combiner.CombineTextByDelimiter("', '", QuoteStyle.None),"miolo"),
             _Values_ = 
                 let
-                    comando = Table.AddColumn(Valores_Miolo, "COMANDO", each "VALUES ('"&[miolo]&"');"),
+                    comando = Table.AddColumn(Valores_Miolo, "COMANDO", each "VALUES ('"&[miolo]&"',GETDATE());"),
                     deletarcoluna = Table.RemoveColumns(comando, {"miolo"})
                 in
                     deletarcoluna,
@@ -50,7 +50,7 @@ let
             MioloCabecalho = Table.CombineColumns(BINCabecalho,Colunas,Combiner.CombineTextByDelimiter(", ", QuoteStyle.None),"miolo"),
             _Cabecalho_ = 
                 let 
-                    comando = Table.AddColumn(MioloCabecalho, "COMANDO", each "INSERT INTO "&Text.From(NomeTabelaInserirDados)&" (" & [miolo] &") "),
+                    comando = Table.AddColumn(MioloCabecalho, "COMANDO", each "INSERT INTO "&Text.From(NomeTabelaInserirDados)&" (" & [miolo] &", DATA_INSERT) "),
                     deletarcoluna = Table.RemoveColumns(comando, {"miolo"})
                 in
                     deletarcoluna,
@@ -59,15 +59,12 @@ let
             //  no final, basta unir, organizar, e pronto
             #"===UNION===" = Table.Combine({_Cabecalho_,_Values_}),
             OrdenarLinhas = Table.Sort(#"===UNION===",{{"Linha", Order.Ascending}}),
-            TextoExtraido = Table.TransformColumns(OrdenarLinhas, {{"COMANDO", each Text.BeforeDelimiter(_, ")"), type text}}),
-            DateDateAtualizado = Table.AddColumn(TextoExtraido, "COMANDO_NOVO", each 
-                if [BIN] = 0 
-                then [COMANDO] & ", DATA_INSERT )"
-                else [COMANDO] &", GETDATE())")[[COMANDO_NOVO]]
-
-
-        in
-            DateDateAtualizado
+            TextoExtraido = Table.TransformColumns(OrdenarLinhas, {{"COMANDO",each  Text.BeforeDelimiter(_, ")", 2) , type text}}),
+    ComandoNovo = Table.AddColumn(TextoExtraido, "COMANDO_NOVO", each if [BIN] = 1 and Text.End([COMANDO],2) = ");"
+then [COMANDO] else if [BIN] = 1 and Text.End([COMANDO],1) <> ");" then [COMANDO] & ");"
+else [COMANDO])[[COMANDO_NOVO]]
+in
+    ComandoNovo
         // ====================================== COMEÇA FUNÇÃO ======================================
 
             , metadados = [
