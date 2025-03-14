@@ -13,11 +13,12 @@ let
             
 
             let
-                ColunaIdBanco ="ID",
-    ColunaIdBaseInsert = "ID",
+                /*ColunaIdBanco ="ID",
+                ColunaIdBaseInsert = "ID",
                 NomeTabelaInserirDados = "ZL_F_FRETES_B",
-                Tabela = Lixo,
-        Linha = Table.AddIndexColumn(Tabela, "Linha", 1, 1, Int64.Type),
+                Tabela = Lixo,*/
+                
+                Linha = Table.AddIndexColumn(Tabela, "Linha", 1, 1, Int64.Type),
 
                 // aqui trabalhamos com as informações dos VALUES
                 #"---Inicio Tratamento Tabela Informações" = "",
