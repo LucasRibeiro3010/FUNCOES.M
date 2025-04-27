@@ -1,0 +1,49 @@
+(Cep as text) =>
+  let
+    Fonte = #table({"a"}, {{Web.BrowserContents("viacep.com.br/ws/" & Cep & "/json/")}}),
+    TextoEntreDelimitadores = Table.TransformColumns(
+      Fonte,
+      {{"a", each Text.BetweenDelimiters(_, "{", "}"), type text}}
+    ),
+    ListaCriada = Table.AddColumn(
+      TextoEntreDelimitadores,
+      "Personalizar",
+      each Text.Split([a], ",")
+    )[Personalizar]{0},
+    ConvertidoTabela = Table.FromList(
+      ListaCriada,
+      Splitter.SplitTextByDelimiter(":"),
+      null,
+      null,
+      ExtraValues.Error
+    ),
+    TextoAparado = Table.TransformColumns(
+      ConvertidoTabela,
+      {{"Column1", Text.Trim, type text}, {"Column2", Text.Trim, type text}}
+    ),
+    TextoMaiuscula = Table.TransformColumns(
+      TextoAparado,
+      {{"Column1", Text.Upper, type text}, {"Column2", Text.Upper, type text}}
+    ),
+    TabelaTransposta = Table.Transpose(TextoMaiuscula),
+    CabecalhosPromovidos = Table.PromoteHeaders(TabelaTransposta, [PromoteAllScalars = true]),
+    Tipagem = Table.TransformColumnTypes(
+      CabecalhosPromovidos,
+      {
+        {"CEP", type text},
+        {"LOGRADOURO", type text},
+        {"COMPLEMENTO", type text},
+        {"UNIDADE", type text},
+        {"BAIRRO", type text},
+        {"LOCALIDADE", type text},
+        {"UF", type text},
+        {"ESTADO", type text},
+        {"REGIAO", type text},
+        {"IBGE", Int64.Type},
+        {"GIA", Int64.Type},
+        {"DDD", Int64.Type},
+        {"SIAFI", Int64.Type}
+      }
+    )
+  in
+    Tipagem
