@@ -1,9 +1,12 @@
 (Lista as list) =>
-let
-
-    
-    TabelaDeUm = #table({"a"},{{"a"}}),
+  let
+    TabelaDeUm = #table({"a"}, {{"a"}}),
     ListaChamada = Table.AddColumn(TabelaDeUm, "Lista", each List.Distinct(Lista))[[Lista]],
-    ValoresExpandidos = "('"&Table.TransformColumns(ListaChamada, {"Lista", each Text.Combine(List.Transform(_, Text.From), "','"), type text})[Lista]{0}&"')"
-in
+    ValoresExpandidos = "('"
+      & Table.TransformColumns(
+        ListaChamada,
+        {"Lista", each Text.Combine(List.Transform(_, Text.From), "','"), type text}
+      )[Lista]{0}
+      & "')"
+  in
     ValoresExpandidos
