@@ -1,0 +1,35 @@
+(Texto as text)=>
+
+let
+  //Texto = "CORAÇÃO",
+  ListaAcentos ={
+    {"Á", "A"},
+    {"À", "A"},
+    {"Â", "A"},
+    {"Ã", "A"},
+    {"Ä", "A"},
+    {"É", "E"},
+    {"È", "E"},
+    {"Ê", "E"},
+    {"Ë", "E"},
+    {"Í", "I"},
+    {"Ì", "I"},
+    {"Î", "I"},
+    {"Ï", "I"},
+    {"Ó", "O"},
+    {"Ò", "O"},
+    {"Ô", "O"},
+    {"Õ", "O"},
+    {"Ö", "O"},
+    {"Ú", "U"},
+    {"Ù", "U"},
+    {"Û", "U"},
+    {"Ü", "U"},
+    {"Ç", "C"}
+  },
+    TextoMaiuscula = Text.Upper(Texto),
+    TextoParaLista = Text.ToList(TextoMaiuscula),
+    AcentosSubstituidos = List.ReplaceMatchingItems(TextoParaLista,ListaAcentos),
+    TextoCombinado = Text.Combine(AcentosSubstituidos)
+in
+    TextoCombinado
