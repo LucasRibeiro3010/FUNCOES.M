@@ -1,0 +1,15 @@
+(Tabela as table, Funcao as function) =>
+  let
+    Fonte = Excel.CurrentWorkbook(){[Name = "Tabela2"]}[Content],
+    TabelaCabecalhos = Table.FromList(
+      Table.ColumnNames(Fonte),
+      Splitter.SplitByNothing(),
+      null,
+      null,
+      ExtraValues.Error
+    ),
+    NomeArrumado = Table.AddColumn(TabelaCabecalhos, "NovoNome", each Funcao([Column1])),
+    ListaCabecalhos = Table.AddColumn(NomeArrumado, "Lista", each {[Column1], [NovoNome]})[Lista],
+    CabecalhosArrumados = Table.RenameColumns(Fonte, ListaCabecalhos)
+  in
+    CabecalhosArrumados
