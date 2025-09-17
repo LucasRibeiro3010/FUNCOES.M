@@ -1,1 +1,0 @@
-scripts/utilidades/meuarquivo.py
