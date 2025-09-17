@@ -1,0 +1,65 @@
+(
+    TabelaDe as table,
+    ColunaDe as text,
+    TabelaPara as table,
+    ColunaJoin as text,
+    ColunaPara as text,
+    TipoColuna as type
+)=>
+
+
+let
+
+
+/*-----------VARIAVEIS PARA AUDITORIA------------
+
+    Fonte = Excel.Workbook(File.Contents("C:\Users\user\OneDrive\Área de Trabalho\Teste Funcao\CONTROLE DE ENTREGAS NOVO - Copia.xlsm"), null, true),
+    TabelaDe = Fonte{[Item="dados",Kind="Table"]}[Data],
+    ColunaDe = "VEICULO",
+    TabelaPara = DEPARA,
+    ColunaJoin = "PLACA_DE",
+    ColunaPara = "PLACA_PARA",
+    TipoColuna = type text,
+*/
+
+    /*--------------------INICIO FUNCAO---------------*/
+    NomeColuna = "Lixo",
+    MeclaDeConsultas = //MESCLANDO AS TABELAS A E B
+        Table.NestedJoin(
+            TabelaDe, 
+            {""& ColunaDe &""}, 
+            TabelaPara, 
+            {""& ColunaJoin &""}, 
+            ""& NomeColuna &"", 
+            JoinKind.LeftOuter
+        ),
+    MesclaExpandida = // EXPANDINDO DA TABELA B APENAS A COLUNA QUE OS VALORES SERVIRÃO DE BASE DE SUBSTITUÇÃO,
+        Table.ExpandTableColumn(
+            MeclaDeConsultas, 
+            NomeColuna, 
+            {"" &ColunaPara& ""}, 
+            {"PLACA_PARA"}
+        ), 
+    Substituicao = // REALIZA A SUBSTITUIÇÃO DE VALORES DA COLUNA SELECIONADA DA TABELA A, COM BASE NA COLUNA REFERENCIA DA TABELA B
+        Table.ReplaceValue(
+            MesclaExpandida,
+            each Record.Field(_, ColunaDe),
+            each
+                if Record.Field(_, ColunaPara) = null then
+                Record.Field(_, ColunaDe)
+                else
+                Record.Field(_, ColunaPara),
+            Replacer.ReplaceValue,
+            {"" & ColunaDe & ""}
+        ),
+    ColunasRemovidas = Table.RemoveColumns(Substituicao, {""&ColunaPara&""}),
+    TipagemColuna = Table.TransformColumnTypes(ColunasRemovidas, {{ColunaDe, TipoColuna }})
+
+in
+    TipagemColuna
+
+
+
+
+    /* ESSA FUNÇÃO FAZ UMA SUBSTUIÇAO DOS VALORES DE UMA COLUNA COM BASE NOS VALORES DE OUTRA, E ESSA COLUNA QUE SERÁ A "COLUNA PARA"
+        PODE ESTAR EM OUTRA TABELA, POIS ESSA FUNÇÃO FAZ UM JOIN ENTRE TABLEAS*/
