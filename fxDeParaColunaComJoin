@@ -1,8 +1,9 @@
 (
     TabelaDe as table,
+    ColunaJoinDe as text,
     ColunaDe as text,
     TabelaPara as table,
-    ColunaJoin as text,
+    ColunaJoinPara as text,
     ColunaPara as text,
     TipoColuna as type
 )=>
@@ -13,23 +14,26 @@ let
 
 /*-----------VARIAVEIS PARA AUDITORIA------------
 
-    Fonte = Excel.Workbook(File.Contents("C:\Users\user\OneDrive\Área de Trabalho\Teste Funcao\CONTROLE DE ENTREGAS NOVO - Copia.xlsm"), null, true),
-    TabelaDe = Fonte{[Item="dados",Kind="Table"]}[Data],
-    ColunaDe = "VEICULO",
-    TabelaPara = DEPARA,
-    ColunaJoin = "PLACA_DE",
-    ColunaPara = "PLACA_PARA",
-    TipoColuna = type text,
+    //Fonte = Excel.Workbook(File.Contents("C:\Users\user\OneDrive\Área de Trabalho\Teste Funcao\CONTROLE DE ENTREGAS NOVO - Copia.xlsm"), null, true),
+    TabelaDe = DE,
+    ColunaJoinDe = "NOME",
+    ColunaDe = "IDADE",
+    TabelaPara = PARA,
+    ColunaJoin = "NOME",
+    ColunaPara = "IDADE",
+    ColunaJoinPara = "NOME",
+    TipoColuna = type number,
 */
+
 
     /*--------------------INICIO FUNCAO---------------*/
     NomeColuna = "Lixo",
     MeclaDeConsultas = //MESCLANDO AS TABELAS A E B
         Table.NestedJoin(
             TabelaDe, 
-            {""& ColunaDe &""}, 
+            {""& ColunaJoinDe &""}, 
             TabelaPara, 
-            {""& ColunaJoin &""}, 
+            {""& ColunaJoinPara &""}, 
             ""& NomeColuna &"", 
             JoinKind.LeftOuter
         ),
@@ -38,21 +42,21 @@ let
             MeclaDeConsultas, 
             NomeColuna, 
             {"" &ColunaPara& ""}, 
-            {"PLACA_PARA"}
+            {"" &NomeColuna& ""}
         ), 
     Substituicao = // REALIZA A SUBSTITUIÇÃO DE VALORES DA COLUNA SELECIONADA DA TABELA A, COM BASE NA COLUNA REFERENCIA DA TABELA B
         Table.ReplaceValue(
             MesclaExpandida,
             each Record.Field(_, ColunaDe),
             each
-                if Record.Field(_, ColunaPara) = null then
+                if Record.Field(_, NomeColuna) = null then
                 Record.Field(_, ColunaDe)
                 else
-                Record.Field(_, ColunaPara),
+                Record.Field(_, NomeColuna),
             Replacer.ReplaceValue,
             {"" & ColunaDe & ""}
         ),
-    ColunasRemovidas = Table.RemoveColumns(Substituicao, {""&ColunaPara&""}),
+    ColunasRemovidas = Table.RemoveColumns(Substituicao, {""&NomeColuna&""}),
     TipagemColuna = Table.TransformColumnTypes(ColunasRemovidas, {{ColunaDe, TipoColuna }})
 
 in
