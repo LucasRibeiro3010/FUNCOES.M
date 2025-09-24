@@ -1,0 +1,55 @@
+let
+    Fonte = (
+    TabelaDe as table,
+    ColunaJoinDe as text,
+    ColunaDe as text,
+    TabelaPara as table,
+    ColunaJoinPara as text,
+    ColunaPara as text,
+    TipoColuna as type
+)=>
+
+
+let
+
+
+/*-----------VARIAVEIS PARA AUDITORIA------------
+
+    //Fonte = Excel.Workbook(File.Contents("C:\Users\user\OneDrive\Área de Trabalho\Teste Funcao\CONTROLE DE ENTREGAS NOVO - Copia.xlsm"), null, true),
+    TabelaDe = FiliaisSemFuncao,
+    ColunaJoinDe = "CLIFOR_ANT",
+    ColunaDe = "CLIFOR_ANT",
+    TabelaPara = DePara,
+    ColunaJoin = "DE",
+    ColunaPara = "PARA",
+    ColunaJoinPara = "DE",
+    TipoColuna = type text,
+    */
+    
+
+    //------------------INICIO FUNCAO-------------------------
+    Join = Table.Join(TabelaDe, "CLIFOR_ANT", TabelaPara, "DE", JoinKind.LeftOuter),
+    Substituicao = Table.ReplaceValue(
+            Join, 
+            each Record.Field(_, ColunaDe),
+            each
+                if Record.Field(_, ColunaPara) = null then
+                Record.Field(_, ColunaDe)
+                else
+                Record.Field(_, ColunaPara),
+            Replacer.ReplaceValue,
+            {"" & ColunaDe & ""}
+        ),
+    ColunasParaSelecionar = Table.ColumnNames(TabelaDe),
+    ColunasSelecionadas = Table.SelectColumns(Substituicao, ColunasParaSelecionar),
+    Tipagem = Table.TransformColumnTypes(ColunasSelecionadas,{{ColunaDe, TipoColuna}})
+in
+    Tipagem
+in 
+    Fonte
+
+
+
+
+    /* ESSA FUNÇÃO FAZ UMA SUBSTUIÇAO DOS VALORES DE UMA COLUNA COM BASE NOS VALORES DE OUTRA, E ESSA COLUNA QUE SERÁ A "COLUNA PARA"
+        PODE ESTAR EM OUTRA TABELA, POIS ESSA FUNÇÃO FAZ UM JOIN ENTRE TABLEAS*/
