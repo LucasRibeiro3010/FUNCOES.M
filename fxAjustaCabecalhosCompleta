@@ -1,0 +1,186 @@
+let
+
+ funcao =
+
+      (
+          Tabela as table,
+          Separador as text,
+          RemoverAssento as number,
+          LetraMaiuscula as number
+      )=>
+
+      let
+        /*LetraMaiuscula = 1,
+        RemoverAssento = 1,
+        Separador = "_",*/    //Variaveis para auditar
+
+
+        fxRemovEspacos = (Texto as text) =>
+          let
+            _Texto         = Texto,
+            espaco         = " ",
+            ListaNome      = Text.Split(_Texto, espaco),
+            EspacoRemovido = List.Transform(List.Select(ListaNome, each _ <> ""), each Text.Trim(_)),
+            Final          = Text.Combine(EspacoRemovido, espaco)
+          in
+            Final,
+        fxRemovQuebras = (Texto as text) =>
+          let
+            _Texto         = Texto,
+            Quebra         = "#(lf)",
+            ListaNome      = Text.Split(_Texto, Quebra),
+            QuebraRemovida = List.Transform(List.Select(ListaNome, each _ <> ""), each Text.Trim(_)),
+            Final          = Text.Combine(QuebraRemovida, " ")
+          in
+            Final,
+        fxRemoveAssentosSimples = (Texto as text) =>
+          let
+
+            //Texto = "CORAÇÃO",
+            ListaAcentos = {
+              {"Á", "A"},
+              {"À", "A"},
+              {"Â", "A"},
+              {"Ã", "A"},
+              {"Ä", "A"},
+              {"É", "E"},
+              {"È", "E"},
+              {"Ê", "E"},
+              {"Ë", "E"},
+              {"Í", "I"},
+              {"Ì", "I"},
+              {"Î", "I"},
+              {"Ï", "I"},
+              {"Ó", "O"},
+              {"Ò", "O"},
+              {"Ô", "O"},
+              {"Õ", "O"},
+              {"Ö", "O"},
+              {"Ú", "U"},
+              {"Ù", "U"},
+              {"Û", "U"},
+              {"Ü", "U"},
+              {"Ç", "C"}
+            },
+            TextoMaiuscula = Text.Upper(Texto),
+            TextoParaLista = Text.ToList(TextoMaiuscula),
+            AcentosSubstituidos = List.ReplaceMatchingItems(TextoParaLista, ListaAcentos),
+            TextoCombinado = Text.Combine(AcentosSubstituidos)
+          in
+            TextoCombinado,
+        Fonte = Tabela,
+        ColunasNomes = Table.FromList(Table.ColumnNames(Fonte)),
+        ColunaDuplicada = Table.DuplicateColumn(ColunasNomes, "Column1", "NovoNome"),
+        EspacosQuebrasRemovidos = Table.TransformColumns(
+          ColunaDuplicada,
+          {{"NovoNome", each fxRemovQuebras(fxRemovEspacos(_)), type text}}
+        ),
+        SeparadorAdicionado = Table.ReplaceValue(
+          EspacosQuebrasRemovidos,
+          " ",
+          Separador,
+          Replacer.ReplaceText,
+          {"NovoNome"}
+        ),
+        RemoverAssentos =
+          if RemoverAssento = 1 then
+            Table.TransformColumns(
+              SeparadorAdicionado,
+              {{"NovoNome", fxRemoveAssentosSimples, type text}}
+            )
+          else
+            SeparadorAdicionado,
+        Maiuscula =
+          if LetraMaiuscula = 1 then
+            Table.TransformColumns(RemoverAssentos, {{"NovoNome", Text.Upper, type text}})
+          else
+            RemoverAssentos,
+        ListaNomes = Table.AddColumn(Maiuscula, "NomeSubistituir", each {[Column1], [NovoNome]})[
+          NomeSubistituir
+        ],
+        Final = Table.RenameColumns(Fonte, ListaNomes)
+      in
+        Final,
+      
+      metadados = [
+                Documentation.Name  = "Função para alterar os nomes dos cabeçalhos",
+                Documentation.Description ="
+                Pega uma tabela e a partir dos parâmetros passados renomeia as colunas alterando os nomes para letra maisucula, separando as palavras através de um delimitador e removendo assentos
+                ",
+                Documentation.Examples = {
+
+                    // exemplo 01
+                    [
+                        Description = "descricao do exemplo 1",
+                        Code = "
+                        funcao(
+                          ---------------------------------
+                          |data de nascimento|nome completo|
+                          |30/10/1999        |lucas ribeiro|
+                          ---------------------------------
+                          ,""_"",
+                          0,
+                          1
+                        )
+                          ",
+                        Result = " 
+                          ---------------------------------                    
+                          |DATA_DE_NASCIMENTO|NOME_COMPLETO|
+                          |30/10/1999        |lucas ribeiro|
+                           ---------------------------------
+                        "
+                    ],
+
+                    // exemplo 02
+                    [
+                        Description = "descricao do exemplo 2",
+                      Code = "
+                        funcao(
+                          ---------------------------------
+                          |data de nascimento|nome completo|
+                          |30/10/1999        |lucas ribeiro|
+                          ---------------------------------
+                          ,""--"",
+                          0,
+                          0
+                        )
+                          ",
+                        Result = "      
+                           ----------------------------------
+                          |data--de--nascimento|nome--completo|
+                          |30/10/1999          |lucas ribeiro |
+                           ----------------------------------
+                        "
+                    ],
+                    [
+                        Description = "descricao do exemplo 3",
+                      Code = "
+                        funcao(
+                          ---------------------------------
+                          |data de nascimento|nome completão|
+                          |30/10/1999        |lucas ribeiro |
+                          ---------------------------------
+                          ,""--"",
+                          1,
+                          1
+                        )
+                          ",
+                        Result = "      
+                           ----------------------------------
+                          |DATA--DE--NASCIMENTO|NOME--COMPLETAO|
+                          |30/10/1999          |lucas ribeiro  |
+                           ----------------------------------
+                        "
+                    ]
+                    // exemplo 03
+                                      
+                }
+            ]
+in
+
+    Value.ReplaceType(
+        funcao,
+        Value.ReplaceMetadata(
+            Value.Type(funcao),metadados
+        )
+    )
