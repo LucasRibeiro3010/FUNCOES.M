@@ -1,0 +1,46 @@
+(
+    Tabela as table
+) =>
+let
+    // Fonte = Csv.Document(
+    //     Web.Contents(
+    //         "https://docs.google.com/spreadsheets/d/1FOd81tpPtIBA3RXszAVHSFmqM09fD6-1hDvSSjVV_Ss/export?format=csv&gid=0"
+    //     ),
+    //     [
+    //         Delimiter = ",",
+    //         Columns = 20,
+    //         Encoding = 65001,
+    //         QuoteStyle = QuoteStyle.None
+    //     ]
+    // ),
+
+    Fonte                = Tabela,
+
+    PrimeiraLinhaMantida = Table.FirstN(
+                               Fonte,
+                               1
+                           ),
+
+    ColunasEmLinhas      = Table.UnpivotOtherColumns(
+                               PrimeiraLinhaMantida,
+                               {},
+                               "Atributo",
+                               "Valor"
+                           ),
+
+    LinhasSelecionadas   = Table.SelectRows(
+                               ColunasEmLinhas,
+                               each ([Valor] <> "")
+                           )[Atributo],
+
+    ColunasSelecionadas  = Table.SelectColumns(
+                               Fonte,
+                               LinhasSelecionadas
+                           ),
+
+    CabecalhosPromovidos = Table.PromoteHeaders(
+                               ColunasSelecionadas,
+                               [PromoteAllScalars = true]
+                           )
+in
+    CabecalhosPromovidos
